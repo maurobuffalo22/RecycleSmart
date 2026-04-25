@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RecycleSmart – Identifique e Recicle</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Reset & Variáveis ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #21262d;
+      --border: #30363d;
+      --accent: #3fb950;
+      --accent2: #58a6ff;
+      --danger: #f85149;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --radius: 12px;
+      --font-mono: 'Space Mono', monospace;
+      --font-sans: 'Syne', sans-serif;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+    }
+
+    /* ── Grid de fundo ──────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(63,185,80,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(63,185,80,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────────── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeDown .6s ease both;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: var(--font-sans);
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--accent);
+    }
+
+    .logo span { color: var(--text); }
+
+    .tagline {
+      margin-top: .4rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: .8rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    /* ── Tabs ────────────────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1px;
+      animation: fadeUp .5s ease .1s both;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: .6rem 1.2rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color .2s, border-color .2s;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── Painéis de entrada ──────────────────────────────────────── */
+    .panel { display: none; animation: fadeUp .35s ease both; }
+    .panel.active { display: block; }
+
+    /* ── Card de formulário ──────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: .6rem;
+    }
+
+    .input-row { display: flex; gap: .75rem; }
+
+    input[type="text"] {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      padding: .75rem 1rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]::placeholder { color: var(--muted); }
+
+    /* ── Botões ──────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-sans);
+      font-size: .95rem;
+      font-weight: 700;
+      padding: .75rem 1.4rem;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      white-space: nowrap;
+    }
+
+    .btn:hover { opacity: .88; }
+    .btn:active { transform: scale(.97); }
+    .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-danger { background: var(--danger); color: #fff; }
+
+    /* ── Upload de foto ──────────────────────────────────────────── */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(63,185,80,.04);
+    }
+
+    .upload-zone input { display: none; }
+
+    .upload-icon { font-size: 2.5rem; display: block; margin-bottom: .75rem; }
+    .upload-zone p { color: var(--muted); font-size: .95rem; }
+    .upload-zone p strong { color: var(--accent); }
+
+    #photo-preview {
+      display: none;
+      width: 100%;
+      max-height: 260px;
+      object-fit: contain;
+      border-radius: 8px;
+      margin-top: 1rem;
+      border: 1px solid var(--border);
+    }
+
+    /* ── Voz ─────────────────────────────────────────────────────── */
+    .voice-center { text-align: center; padding: 1rem 0; }
+
+    .mic-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      font-size: 2rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background .2s, border-color .2s, box-shadow .2s;
+      margin-bottom: 1rem;
+    }
+
+    .mic-btn:hover { border-color: var(--accent2); }
+
+    .mic-btn.recording {
+      background: rgba(248,81,73,.15);
+      border-color: var(--danger);
+      box-shadow: 0 0 0 8px rgba(248,81,73,.1);
+      animation: pulse 1.2s infinite;
+    }
+
+    .voice-status {
+      font-family: var(--font-mono);
+      font-size: .8rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    #voice-transcript {
+      min-height: 48px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      font-style: italic;
+      color: var(--muted);
+      font-size: .95rem;
+      text-align: left;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Resultado ───────────────────────────────────────────────── */
+    #result-section {
+      display: none;
+      animation: fadeUp .4s ease both;
+    }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .bin-badge {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      border: 3px solid rgba(255,255,255,.15);
+    }
+
+    .result-material { font-size: 1.3rem; font-weight: 800; }
+    .result-bin { font-family: var(--font-mono); font-size: .8rem; color: var(--muted); margin-top: .1rem; }
+
+    .score-pill {
+      margin-left: auto;
+      padding: .3rem .8rem;
+      border-radius: 20px;
+      font-family: var(--font-mono);
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .score-ALTO  { background: rgba(63,185,80,.15); color: var(--accent); border: 1px solid rgba(63,185,80,.3); }
+    .score-MÉDIO { background: rgba(255,166,0,.12); color: #f0a500; border: 1px solid rgba(255,166,0,.3); }
+    .score-BAIXO { background: rgba(248,81,73,.12); color: var(--danger); border: 1px solid rgba(248,81,73,.3); }
+    .score-INDETERMINADO { background: rgba(139,148,158,.12); color: var(--muted); border: 1px solid var(--border); }
+
+    .result-body { padding: 1.5rem; display: grid; gap: 1.2rem; }
+
+    .result-section-title {
+      font-family: var(--font-mono);
+      font-size: .7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-bottom: .4rem;
+    }
+
+    .result-text {
+      font-size: .97rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .impact-box {
+      background: rgba(248,81,73,.06);
+      border: 1px solid rgba(248,81,73,.2);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .impact-box .result-section-title { color: #f85149aa; }
+
+    /* ── Loading ─────────────────────────────────────────────────── */
+    .loader {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      gap: .75rem;
+      padding: 2rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: .85rem;
+    }
+
+    .loader.active { display: flex; }
+
+    .spinner {
+      width: 22px; height: 22px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    /* ── Toast ───────────────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .75rem 1.4rem;
+      font-family: var(--font-mono);
+      font-size: .82rem;
+      color: var(--text);
+      opacity: 0;
+      transition: all .3s;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Footer ──────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: .75rem;
+    }
+
+    footer a { color: var(--accent2); text-decoration: none; }
+
+    /* ── Animações ───────────────────────────────────────────────── */
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:none; } }
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(14px);  } to { opacity:1; transform:none; } }
+    @keyframes spin     { to { transform: rotate(360deg); } }
+    @keyframes pulse    { 0%,100% { box-shadow: 0 0 0 8px rgba(248,81,73,.1); } 50% { box-shadow: 0 0 0 16px rgba(248,81,73,.02); } }
+
+    /* ── Responsivo ─────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .logo { font-size: 1.7rem; }
+      .input-row { flex-direction: column; }
+      .result-header { flex-wrap: wrap; }
+      .score-pill { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">♻ Recycle<span>Smart</span></div>
+    <p class="tagline">Identifique · Descarte Correto · Salve o Planeta</p>
+  </header>
+
+  <!-- TABS -->
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" data-tab="text"  onclick="switchTab('text')"  role="tab">📝 Texto</button>
+    <button class="tab-btn"        data-tab="photo" onclick="switchTab('photo')" role="tab">📷 Foto</button>
+    <button class="tab-btn"        data-tab="voice" onclick="switchTab('voice')" role="tab">🎙️ Voz</button>
+  </div>
+
+  <!-- PAINEL: TEXTO -->
+  <div id="panel-text" class="panel active">
+    <div class="card">
+      <label for="text-input">Descreva o objeto que deseja reciclar</label>
+      <div class="input-row">
+        <input type="text" id="text-input"
+               placeholder="Ex: garrafa de plástico, lata de alumínio, jornal..."
+               onkeydown="if(event.key==='Enter') identifyByText()" />
+        <button class="btn" onclick="identifyByText()">🔍 Identificar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL: FOTO -->
+  <div id="panel-photo" class="panel">
+    <div class="card">
+      <label>Envie uma foto do objeto</label>
+      <div class="upload-zone" id="upload-zone"
+           onclick="document.getElementById('photo-input').click()"
+           ondragover="handleDragOver(event)"
+           ondragleave="this.classList.remove('dragover')"
+           ondrop="handleDrop(event)">
+        <input type="file" id="photo-input" accept="image/*" onchange="handleFileSelect(event)" />
+        <span class="upload-icon">🖼️</span>
+        <p>Arraste a imagem aqui ou <strong>clique para selecionar</strong></p>
+        <p style="margin-top:.4rem;font-size:.8rem;">JPG, PNG, WEBP — máx. 10 MB</p>
+      </div>
+      <img id="photo-preview" alt="Pré-visualização da imagem" />
+      <div style="margin-top:1rem;text-align:right;">
+        <button class="btn" id="btn-photo-send" disabled onclick="identifyByPhoto()">📷 Analisar Foto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL: VOZ -->
+  <div id="panel-voice" class="panel">
+    <div class="card">
+      <label>Diga o nome do objeto que deseja reciclar</label>
+      <div class="voice-center">
+        <button class="mic-btn" id="mic-btn" onclick="toggleRecording()" title="Pressione para gravar">🎙️</button>
+        <p class="voice-status" id="voice-status">Pressione o microfone e fale o nome do objeto</p>
+        <div id="voice-transcript">Aguardando transcrição de voz...</div>
+        <button class="btn" id="btn-voice-send" disabled onclick="identifyByVoice()">🔍 Identificar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <span id="loader-text">Analisando material...</span>
+  </div>
+
+  <!-- RESULTADO -->
+  <div id="result-section">
+    <div class="result-card">
+      <div class="result-header">
+        <div class="bin-badge" id="res-bin-badge">♻️</div>
+        <div>
+          <div class="result-material" id="res-material">—</div>
+          <div class="result-bin" id="res-bin">Lixeira —</div>
+        </div>
+        <span class="score-pill" id="res-score">—</span>
+      </div>
+      <div class="result-body">
+        <div>
+          <div class="result-section-title">✅ Como reciclar corretamente</div>
+          <div class="result-text" id="res-instruction">—</div>
+        </div>
+        <div class="impact-box">
+          <div class="result-section-title">⚠️ Impacto ambiental se não reciclar</div>
+          <div class="result-text" id="res-impact">—</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:1rem; text-align:right;">
+      <button class="btn btn-ghost" onclick="resetResult()">🔄 Nova consulta</button>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- FOOTER -->
+<footer>
+  <p>RecycleSmart MVP &mdash; Facens -Análise de Sistemas e Desenvolvimento de Software</p>
+  <p style="margin-top:.3rem;">API: <a href="http://localhost:8080/api/health" target="_blank">localhost:8080</a></p>
+</footer>
+
+<!-- ════════════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════════ -->
+<script>
+  const API_BASE = 'http://localhost:8080/api';
+  let selectedFile = null;
+  let recognition = null;
+  let isRecording = false;
+  let voiceTranscript = '';
+
+  /* ── Utilitários ──────────────────────────────────────────── */
+
+  function showToast(msg, duration = 3000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+  }
+
+  function setLoading(active, message = 'Analisando material...') {
+    const loader = document.getElementById('loader');
+    document.getElementById('loader-text').textContent = message;
+    loader.classList.toggle('active', active);
+    document.getElementById('result-section').style.display = 'none';
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
+    resetResult();
+  }
+
+  function resetResult() {
+    document.getElementById('result-section').style.display = 'none';
+    document.getElementById('loader').classList.remove('active');
+  }
+
+  /* ── Renderizar resultado ─────────────────────────────────── */
+
+  function renderResult(data) {
+    setLoading(false);
+
+    // Mapeamento de cores de lixeira para emoji e cor de fundo
+    const binColors = {
+      'Vermelho':    { emoji: '🔴', bg: '#E53935' },
+      'Verde':       { emoji: '🟢', bg: '#43A047' },
+      'Azul':        { emoji: '🔵', bg: '#1E88E5' },
+      'Amarelo':     { emoji: '🟡', bg: '#FDD835' },
+      'Marrom':      { emoji: '🟤', bg: '#6D4C41' },
+      'Cinza/Preto': { emoji: '⚫', bg: '#757575' },
+      'Cinza':       { emoji: '⚫', bg: '#757575' },
+      'Branco (Ponto de coleta especial)': { emoji: '⚪', bg: '#B0BEC5' },
+      'Ponto de coleta especial':          { emoji: '🟠', bg: '#FF8F00' },
+    };
+
+    const bin = data.binColor || 'Cinza';
+    const info = binColors[bin] || { emoji: '♻️', bg: '#757575' };
+
+    const badge = document.getElementById('res-bin-badge');
+    badge.textContent = info.emoji;
+    badge.style.background = info.bg + '22';
+    badge.style.borderColor = info.bg + '66';
+
+    document.getElementById('res-material').textContent    = data.identifiedMaterial || '—';
+    document.getElementById('res-bin').textContent         = `Lixeira ${bin}`;
+    document.getElementById('res-instruction').textContent = data.recyclingInstruction || '—';
+    document.getElementById('res-impact').textContent      = data.environmentalImpact || '—';
+
+    const score = data.recyclabilityScore || 'INDETERMINADO';
+    const scoreEl = document.getElementById('res-score');
+    scoreEl.textContent = `Reciclabilidade: ${score}`;
+    scoreEl.className = `score-pill score-${score}`;
+
+    document.getElementById('result-section').style.display = 'block';
+    document.getElementById('result-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ── Tratamento de erro de API ────────────────────────────── */
+
+  function handleApiError(err) {
+    setLoading(false);
+    console.error('Erro na API:', err);
+    showToast('❌ Erro ao conectar com a API. Verifique se o backend está rodando.');
+  }
+
+  /* ── IDENTIFICAÇÃO POR TEXTO ──────────────────────────────── */
+
+  async function identifyByText() {
+    const input = document.getElementById('text-input');
+    const description = input.value.trim();
+
+    if (!description) {
+      showToast('⚠️ Digite a descrição do objeto antes de identificar.');
+      input.focus();
+      return;
+    }
+
+    setLoading(true, 'Analisando descrição...');
+
+    try {
+      const response = await fetch(`${API_BASE}/identify/text`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description })
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      renderResult(data);
+    } catch (err) {
+      handleApiError(err);
+    }
+  }
+
+  /* ── IDENTIFICAÇÃO POR FOTO ───────────────────────────────── */
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.add('dragover');
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) preparePhotoFile(file);
+  }
+
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) preparePhotoFile(file);
+  }
+
+  function preparePhotoFile(file) {
+    if (!file.type.startsWith('image/')) {
+      showToast('⚠️ Selecione apenas arquivos de imagem.');
+      return;
+    }
+
+    selectedFile = file;
+    const preview = document.getElementById('photo-preview');
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+    document.getElementById('btn-photo-send').disabled = false;
+    showToast(`✅ Imagem "${file.name}" selecionada.`);
+  }
+
+  async function identifyByPhoto() {
+    if (!selectedFile) {
+      showToast('⚠️ Selecione uma imagem primeiro.');
+      return;
+    }
+
+    setLoading(true, 'Analisando imagem...');
+
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+
+    try {
+      const response = await fetch(`${API_BASE}/identify/photo`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      renderResult(data);
+    } catch (err) {
+      handleApiError(err);
+    }
+  }
+
+  /* ── IDENTIFICAÇÃO POR VOZ ────────────────────────────────── */
+
+  function toggleRecording() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      showToast('❌ Seu navegador não suporta reconhecimento de voz. Use Chrome.');
+      return;
+    }
+
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  }
+
+  function startRecording() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+
+    recognition.onstart = () => {
+      isRecording = true;
+      document.getElementById('mic-btn').classList.add('recording');
+      document.getElementById('voice-status').textContent = '🔴 Gravando... fale agora!';
+      document.getElementById('voice-transcript').textContent = '';
+      document.getElementById('btn-voice-send').disabled = true;
+    };
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          voiceTranscript += event.results[i][0].transcript;
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      document.getElementById('voice-transcript').textContent =
+        voiceTranscript + (interim ? ` ${interim}` : '');
+    };
+
+    recognition.onend = () => {
+      isRecording = false;
+      document.getElementById('mic-btn').classList.remove('recording');
+      document.getElementById('voice-status').textContent = '✅ Gravação concluída';
+      if (voiceTranscript.trim()) {
+        document.getElementById('btn-voice-send').disabled = false;
+      }
+    };
+
+    recognition.onerror = (e) => {
+      isRecording = false;
+      document.getElementById('mic-btn').classList.remove('recording');
+      document.getElementById('voice-status').textContent = 'Erro: ' + e.error;
+      showToast('❌ Erro no reconhecimento de voz: ' + e.error);
+    };
+
+    voiceTranscript = '';
+    recognition.start();
+  }
+
+  function stopRecording() {
+    if (recognition) recognition.stop();
+  }
+
+  async function identifyByVoice() {
+    const transcript = voiceTranscript.trim();
+    if (!transcript) {
+      showToast('⚠️ Nenhuma fala detectada. Tente novamente.');
+      return;
+    }
+
+    setLoading(true, 'Processando comando de voz...');
+
+    try {
+      const response = await fetch(`${API_BASE}/identify/voice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript })
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      renderResult(data);
+    } catch (err) {
+      handleApiError(err);
+    }
+  }
+
+  /* ── Verificação de conexão com a API ao carregar ─────────── */
+  window.addEventListener('load', async () => {
+    try {
+      const r = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(3000) });
+      if (r.ok) showToast('✅ API conectada — pronto para usar!');
+    } catch {
+      showToast('⚠️ API offline. Inicie o backend Spring Boot.', 5000);
+    }
+  });
+</script>
+
+</body>
+</html>
