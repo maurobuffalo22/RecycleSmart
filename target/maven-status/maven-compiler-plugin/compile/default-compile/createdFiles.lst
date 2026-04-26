@@ -1,0 +1,6 @@
+com\recyclesmart\repository\RecyclingKnowledgeBase.class
+com\recyclesmart\controller\RecyclingController.class
+com\recyclesmart\model\RecyclingRule.class
+com\recyclesmart\RecycleSmartApp.class
+com\recyclesmart\model\RecyclableItem.class
+com\recyclesmart\service\RecyclingIdentificationService.class
